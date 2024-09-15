@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, director, Node } from 'cc';
 const { ccclass, menu } = _decorator;
 
 @ccclass('Player')
@@ -13,6 +13,12 @@ export class Player extends Component {
     update(deltaTime: number) {
         
     }
+
+    public Kill():void{
+        console.log("Kill");
+        director.loadScene(director.getScene().name);
+    }
+
 }
 
 

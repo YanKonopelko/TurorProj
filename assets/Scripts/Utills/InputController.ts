@@ -1,7 +1,12 @@
-import { _decorator, Component, EventKeyboard, Input, input, KeyCode, Node, Vec2 } from 'cc';
-const { ccclass, property } = _decorator;
+import { _decorator, Component, EventKeyboard, Input, input, KeyCode, Vec2 } from 'cc';
+const { ccclass } = _decorator;
+
+export enum EInputType {
+    OnKeyPressing = "OnKeyPressing"
+}
 
 @ccclass('InputController')
+
 export class InputController extends Component {
 
     private static inputAxis: Vec2 = new Vec2(0, 0);
@@ -12,39 +17,114 @@ export class InputController extends Component {
     private verticalInputSchedule: boolean[] = [false, false];
     private horizontalInputSchedule: boolean[] = [false, false];
 
+    private AllKeysPhases:Map<KeyCode,boolean> = new Map<KeyCode,boolean>();
+
+    private static AllListeners:Map<EInputType,[CallableFunction]> = new Map<EInputType,[CallableFunction]>;
+
+    public static OnKeyPressing: Function;
+
 
     public static get InputAxis() {
         return InputController.inputAxis.clone();
     }
 
+    public static On(inputType:EInputType,callback:CallableFunction){
+        if(!InputController.AllListeners[inputType]){
+            InputController.AllListeners[inputType] = [];
+        }
+        InputController.AllListeners[inputType].push(callback);
+    }
+
+    public static Off(inputType:EInputType,callback:CallableFunction){
+        if(InputController.AllListeners[inputType].find(callback))
+            InputController.AllListeners[inputType].remove(callback);
+    }
+
     protected onEnable(): void {
+
+        this.ResetInputs();
+
+        let a = (event) => {this.OnFocus(event)};
+        window.onfocus = function(event) {
+            a(event);
+        };
+        let b = (event) => {this.OnBlur(event)};
+
+        window.onblur = function(event) {
+            b(event);
+
+        };
+
         input.on(Input.EventType.KEY_DOWN, this.OnKeyDown, this);
         input.on(Input.EventType.KEY_UP, this.OnKeyUp, this);
+
+        InputController.On(EInputType.OnKeyPressing,this.OnKeyPressing.bind(this) );
+
+    }
+
+    private ResetInputs(){
+        const keys = Object.keys(KeyCode);        
+        keys.forEach((key, index) => {
+          this.AllKeysPhases[key] = false;  
+        });
+        this.lastHorizontalInput = 0;
+        this.lastVerticalInput = 0;
+
+        this.verticalInputSchedule = [false,false];
+        this.horizontalInputSchedule = [false,false];
+
+        InputController.inputAxis = new Vec2(0,0);
+    }
+
+    private OnBlur(any){
+        console.log("OnBlur:")
+        console.log(new Date());
+        this.ResetInputs();
+    }
+    private OnFocus(any){
+        console.log("OnFocus:")
+        console.log(new Date());
     }
 
     protected onDisable(): void {
         input.off(Input.EventType.KEY_DOWN, this.OnKeyDown, this);
+        InputController.Off(EInputType.OnKeyPressing,this.OnKeyPressing.bind(this));
         input.off(Input.EventType.KEY_UP, this.OnKeyUp, this);
+
+        const keys = Object.keys(InputController.AllListeners);        
+        keys.forEach((key, index) => {
+            InputController.AllListeners[key] = [];  
+        });
+
     }
 
     private OnKeyDown(event: EventKeyboard) {
+        this.AllKeysPhases[event.keyCode] = true;
+    }
 
-        if (event.keyCode == KeyCode.ARROW_UP || event.keyCode == KeyCode.KEY_W) {
+
+    
+
+    private OnKeyPressing(event: KeyCode) {
+
+
+        if (event == KeyCode.ARROW_UP || event == KeyCode.KEY_W) {
             this.UpdateAxis(null, 1);
         }
-        if (event.keyCode == KeyCode.ARROW_LEFT || event.keyCode == KeyCode.KEY_A) {
+        if (event == KeyCode.ARROW_LEFT || event == KeyCode.KEY_A) {
             this.UpdateAxis(-1, null);
         }
-        if (event.keyCode == KeyCode.ARROW_DOWN || event.keyCode == KeyCode.KEY_S) {
+        if (event == KeyCode.ARROW_DOWN || event == KeyCode.KEY_S) {
             this.UpdateAxis(null, -1);
         }
-        if (event.keyCode == KeyCode.ARROW_RIGHT || event.keyCode == KeyCode.KEY_D) {
+        if (event == KeyCode.ARROW_RIGHT || event == KeyCode.KEY_D) {
             this.UpdateAxis(1, null);
         }
     }
 
     private OnKeyUp(event: EventKeyboard) {
 
+        this.AllKeysPhases[event.keyCode] = false;
         
         if (event.keyCode == KeyCode.ARROW_UP || event.keyCode == KeyCode.KEY_W) {
 
@@ -116,6 +196,26 @@ export class InputController extends Component {
             InputController.inputAxis.y = verticalVelocity;
             this.lastVerticalInput = verticalVelocity;
         }
+    }
+
+    protected update(dt: number): void {
+
+        const keys = Object.keys(this.AllKeysPhases);        
+        keys.forEach((key, index) => {
+            if(this.AllKeysPhases[key]){
+
+                const Listenerskeys = Object.keys(InputController.AllListeners);        
+
+                Listenerskeys.forEach((key1, index) => {
+                    InputController.AllListeners[key1].forEach(callback => {
+                        callback(key); ;  
+                    });
+                });
+                
+            }
+        });
+
+    
     }
 
 }

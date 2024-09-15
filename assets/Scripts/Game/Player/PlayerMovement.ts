@@ -1,6 +1,6 @@
 import { _decorator, CCFloat, Component, EventKeyboard, input, Input, KeyCode, Node, RigidBody2D, Vec2  } from 'cc';
 import { Player } from './Player';
-import { InputController } from './InputController';
+import { EInputType, InputController } from '../../Utills/InputController';
 const { ccclass, property,executionOrder,executeInEditMode,requireComponent,disallowMultiple,menu,help } = _decorator;
 
 
@@ -51,11 +51,25 @@ export class PlayerMovement extends Component {
 
     private currentInputVelocity:Vec2 = new Vec2(0,0);
 
+    protected onEnable(): void {
+        InputController.On(EInputType.OnKeyPressing,this.KeyPress)
+        
+    }
 
+    protected onDisable(): void {
+        InputController.Off(EInputType.OnKeyPressing,this.KeyPress)
+    }
+    protected onDestroy(): void {
+        InputController.Off(EInputType.OnKeyPressing,this.KeyPress)
+    }
+
+    private KeyPress(keyCode:KeyCode){
+        console.log(keyCode);
+    }
 
     protected update(dt: number): void {
-        this.rb.linearVelocity = (InputController.InputAxis.multiplyScalar(this.moveSpeed));
-    
+        this.rb.linearVelocity = (InputController.InputAxis.multiplyScalar(this.moveSpeed*dt));
+        
     }
 
 
