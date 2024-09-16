@@ -21,8 +21,6 @@ export class InputController extends Component {
 
     private static AllListeners:Map<EInputType,[CallableFunction]> = new Map<EInputType,[CallableFunction]>;
 
-    public static OnKeyPressing: Function;
-
 
     public static get InputAxis() {
         return InputController.inputAxis.clone();
@@ -52,14 +50,10 @@ export class InputController extends Component {
 
         window.onblur = function(event) {
             b(event);
-
         };
 
         input.on(Input.EventType.KEY_DOWN, this.OnKeyDown, this);
         input.on(Input.EventType.KEY_UP, this.OnKeyUp, this);
-
-        InputController.On(EInputType.OnKeyPressing,this.OnKeyPressing.bind(this) );
-
     }
 
     private ResetInputs(){
@@ -88,7 +82,6 @@ export class InputController extends Component {
 
     protected onDisable(): void {
         input.off(Input.EventType.KEY_DOWN, this.OnKeyDown, this);
-        InputController.Off(EInputType.OnKeyPressing,this.OnKeyPressing.bind(this));
         input.off(Input.EventType.KEY_UP, this.OnKeyUp, this);
 
         const keys = Object.keys(InputController.AllListeners);        
@@ -100,24 +93,17 @@ export class InputController extends Component {
 
     private OnKeyDown(event: EventKeyboard) {
         this.AllKeysPhases[event.keyCode] = true;
-    }
-
-
     
-
-    private OnKeyPressing(event: KeyCode) {
-
-
-        if (event == KeyCode.ARROW_UP || event == KeyCode.KEY_W) {
+        if (event.keyCode == KeyCode.ARROW_UP || event.keyCode == KeyCode.KEY_W) {
             this.UpdateAxis(null, 1);
         }
-        if (event == KeyCode.ARROW_LEFT || event == KeyCode.KEY_A) {
+        if (event.keyCode == KeyCode.ARROW_LEFT || event.keyCode == KeyCode.KEY_A) {
             this.UpdateAxis(-1, null);
         }
-        if (event == KeyCode.ARROW_DOWN || event == KeyCode.KEY_S) {
+        if (event.keyCode == KeyCode.ARROW_DOWN || event.keyCode == KeyCode.KEY_S) {
             this.UpdateAxis(null, -1);
         }
-        if (event == KeyCode.ARROW_RIGHT || event == KeyCode.KEY_D) {
+        if (event.keyCode == KeyCode.ARROW_RIGHT || event.keyCode == KeyCode.KEY_D) {
             this.UpdateAxis(1, null);
         }
     }

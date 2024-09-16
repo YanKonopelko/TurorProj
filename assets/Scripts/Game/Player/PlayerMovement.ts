@@ -1,6 +1,7 @@
 import { _decorator, CCFloat, Component, EventKeyboard, input, Input, KeyCode, Node, RigidBody2D, Vec2  } from 'cc';
 import { Player } from './Player';
 import { EInputType, InputController } from '../../Utills/InputController';
+import { MathInputController } from '../../Utills/MathInputController';
 const { ccclass, property,executionOrder,executeInEditMode,requireComponent,disallowMultiple,menu,help } = _decorator;
 
 
@@ -68,7 +69,7 @@ export class PlayerMovement extends Component {
     }
 
     protected update(dt: number): void {
-        this.rb.linearVelocity = (InputController.InputAxis.multiplyScalar(this.moveSpeed*dt));
+        this.rb.linearVelocity = (MathInputController.InputAxis.multiplyScalar(this.moveSpeed*dt));
         
     }
 

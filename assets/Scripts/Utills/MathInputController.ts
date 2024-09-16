@@ -1,13 +1,13 @@
 import { _decorator, Component, EventKeyboard, Input, input, KeyCode, Vec2 } from 'cc';
 const { ccclass } = _decorator;
 
-@ccclass('InputController')
-export class InputController extends Component {
+@ccclass('MathInputController')
+export class MathInputController extends Component {
 
     private static inputAxis: Vec2 = new Vec2(0, 0);
 
     public static get InputAxis() {
-        return InputController.inputAxis.clone();
+        return MathInputController.inputAxis.clone();
     }
 
     protected onEnable(): void {
@@ -60,11 +60,11 @@ export class InputController extends Component {
 
 
         if (typeof (horizontalVelocity) == typeof (0)) {
-            InputController.inputAxis.x += horizontalVelocity;
+            MathInputController.inputAxis.x += horizontalVelocity;
         }
 
         if (typeof (verticalVelocity) == typeof (0)) {
-            InputController.inputAxis.y += verticalVelocity;
+            MathInputController.inputAxis.y += verticalVelocity;
         }
     }
 
